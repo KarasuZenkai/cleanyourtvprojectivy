@@ -1,31 +1,7 @@
-# Security
+# Seguridad
 
-CleanYourTV talks to TVs over ADB and installs a launcher on them, so a security bug here can
-reach people's living rooms. Please report anything you find privately, not in a public issue.
+Esta variante de [CleanYourTV, de Gathin23](https://github.com/Gathin23/cleanyourtv), usa ADB para cambiar el HOME de una TV. Un error puede dejar el botón Inicio sin un destino funcional o cortar la conexión Wi-Fi. Por eso tools/projectivy.py comprueba Projectivy, guarda el estado previo y ofrece restore.
 
-## How to report
+Reporta fallos del script de este fork mediante el [reporte privado de vulnerabilidades del fork](https://github.com/KarasuZenkai/cleanyourtvprojectivy/security/advisories/new), si está habilitado. Para fallos del proyecto original, usa la [sección de seguridad de CleanYourTV](https://github.com/Gathin23/cleanyourtv/security). Para fallos de la aplicación Projectivy, usa el [repositorio de Spocky](https://github.com/spocky/miproja1/issues).
 
-Use GitHub's private vulnerability reporting: open the
-[Security tab](https://github.com/Gathin23/cleanyourtv/security) and choose **Report a vulnerability**.
-Only the maintainer sees the report. If that doesn't work for you, email
-[hello@itsgathin.com](mailto:hello@itsgathin.com) with "Security" in the subject.
-
-Please include what is affected (the prompt, a tool in `tools/`, the launcher, a debloat list),
-the steps to reproduce it, and what an attacker could do with it.
-
-## What counts
-
-- The launcher (`com.gathin.tvhome`) doing something it shouldn't: reaching the network, exposing
-  data to other apps, or being made to open something it shouldn't.
-- The tools (`tools/tv.py`, `disable.sh`, `restore.sh`, `theme.sh`, `recovery.py`) running commands
-  on a device or computer they weren't pointed at, or mishandling paths and input.
-- A debloat list or the prompt leading to a TV that can't be restored with `tools/restore.sh`.
-- Anything in a pull request that runs code on a contributor's or maintainer's machine.
-
-ADB itself is powerful by design. Turning on USB or network debugging lets any computer on your
-network ask to connect, and the TV asks you to allow it. Turn debugging off when you're done.
-
-## What happens next
-
-You'll get a reply within a few days. Fixes go into `main` with credit to you, unless you'd rather
-stay anonymous. Please give a fix a reasonable chance to ship before you publish details.
+Incluye modelo, firmware, pasos y efecto observado. No adjuntes claves ADB, direcciones IP públicas, nombres de red ni copias de seguridad sin revisar. Al terminar la configuración, desactiva Depuración inalámbrica si ya no la necesitas.

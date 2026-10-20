@@ -1,6 +1,16 @@
-# CleanYourTV Projectivy
+# CleanYourTV con Projectivy
 
-Fork de [CleanYourTV](https://github.com/Gathin23/cleanyourtv) adaptado para usar **Projectivy Launcher** como pantalla de inicio de Google TV. Projectivy es una aplicación independiente: este repositorio no la compila, distribuye ni modifica. El objetivo es conservar su configuración y asignarla como **HOME** de Android para que el botón Inicio y el arranque completo abran Projectivy.
+> **Variante de [CleanYourTV](https://github.com/Gathin23/cleanyourtv), creado por [Gathin23](https://github.com/Gathin23).** Este fork conserva el enfoque reversible de ADB y usa [Projectivy Launcher, de Spocky](https://github.com/spocky/miproja1), como inicio predeterminado. No es una versión oficial de ninguno de los dos proyectos.
+
+![Ejemplo público de la interfaz de Projectivy con accesos y canales](https://projectivylauncher.com/assets/screenshots/channels.jpg)
+
+*Captura demostrativa del [sitio de Projectivy](https://projectivylauncher.com/); no corresponde a nuestra TCL ni a su configuración personal.*
+
+![Ejemplo público de Projectivy con categorías de aplicaciones](https://projectivylauncher.com/assets/screenshots/cat.jpg)
+
+*Otra configuración de muestra publicada por [Projectivy](https://projectivylauncher.com/). La apariencia final depende de los ajustes de cada usuario.*
+
+Esta variante usa **Projectivy Launcher** como pantalla de inicio de Google TV. Projectivy es una aplicación independiente: este repositorio no la compila, distribuye ni modifica. El objetivo es conservar su configuración y asignarla como **HOME** de Android para que el botón Inicio y el arranque completo abran Projectivy. Al hacerlo, desactiva el inicio principal de Google TV (`LauncherX`) para el usuario 0; en la TCL comprobada también desactiva `setupwraith` porque reclamaba HOME.
 
 El cambio se comprobó en una **TCL 75A400 Pro NXTVISION**, Android TV 14, placa `tcl9618`, producto `G08_4K_GB_NF`, compilación `UTT2.250416.001 AU02`. Tras desactivar LauncherX y, cuando tomó HOME, el componente de recuperación `setupwraith`, Projectivy abrió con el botón Inicio y después de un reinicio completo. Los botones físicos de Fuentes y Ajustes siguieron funcionando. **No se ha comprobado un corte eléctrico real** ni se garantiza el mismo comportamiento en otro firmware.
 
@@ -10,7 +20,7 @@ El cambio se comprobó en una **TCL 75A400 Pro NXTVISION**, Android TV 14, placa
 2. Lee el HOME actual, el estado de LauncherX y setupwraith, la versión de firmware y el dueño de las redes Wi-Fi guardadas.
 3. Guarda el estado original en un archivo JSON local **antes** de modificar la TV.
 4. Asigna Projectivy a HOME y al rol HOME, y desactiva LauncherX **solo para el usuario 0**.
-5. Si setupwraith toma HOME, lo desactiva y vuelve a asignar Projectivy.
+5. En la TCL A400 Pro comprobada, desactiva `setupwraith` tras verificar la red Wi-Fi y vuelve a asignar Projectivy. En otros Google TV solo lo desactiva si toma HOME.
 6. Verifica que Android resuelva HOME a Projectivy. Si falla, intenta restaurar LauncherX y el HOME anterior.
 
 No instala APKs, no desinstala paquetes, no cambia accesibilidad, no activa autoinicio y no ejecuta una lista de debloat. Las preferencias, filas y aplicaciones de Projectivy se configuran en la propia app. La configuración de accesibilidad puede desactivarse en algunas TCL al reiniciar; ser el HOME real evita depender de ella para el arranque o el botón Inicio.
@@ -64,10 +74,12 @@ En la TCL probada, al desactivar LauncherX, `com.google.android.tungsten.setupwr
 
 En este firmware TCL, el permiso interno `AUTO_START` y `accessibility_enabled` se restablecían tras reiniciar. Por eso este flujo usa el HOME del sistema. No afirmamos que Projectivy no necesite accesibilidad para **otras** funciones opcionales.
 
-## Debloat y contenido heredado
+## Debloat y procedencia
 
 El cambio de HOME no requiere desactivar telemetría, Chromecast, actualizaciones, TV en vivo ni otros paquetes. Las listas en [`examples/`](examples/) pertenecen a otros televisores; **no apliques la lista de TCL C755 o QM6K a la A400 Pro** por compartir placa o versión. Si quieres debloat, revisa cada paquete de tu equipo y usa [`tools/disable.sh`](tools/disable.sh) y [`tools/restore.sh`](tools/restore.sh) de forma independiente, con sus propias copias.
 
-El launcher estilo Apple TV, sus temas, scripts de compilación, ejemplos, pruebas y documentación originales permanecen en el fork como contenido heredado. El flujo principal de este fork es Projectivy. Consulta [la documentación original](README.upstream.md) si necesitas esas herramientas; sus instrucciones sobre construir `com.gathin.tvhome` **no forman parte del procedimiento Projectivy**. [`PROMPT.md`](PROMPT.md) contiene el encargo actualizado para un asistente técnico.
+Las listas de [`examples/`](examples/) provienen del proyecto principal y se conservan como referencias históricas de otros modelos. Sus comentarios pueden describir paquetes o decisiones que no aplican a esta TV; no equivalen a una validación de Projectivy en esos equipos. Los scripts generales de debloat y restauración también derivan de CleanYourTV. El código y las imágenes del launcher propio del proyecto original se consultan en el [repositorio de Gathin23](https://github.com/Gathin23/cleanyourtv); fueron retirados de esta variante para que no se confundan con Projectivy.
+
+Este fork mantiene la [licencia MIT original](LICENSE) y reconoce la autoría de [Gathin23](https://github.com/Gathin23) para CleanYourTV y de [Spocky](https://github.com/spocky) para Projectivy. La opción de [apoyar al autor original](https://buymeacoffee.com/gathint) permanece en el repositorio. Las capturas de arriba pertenecen al material público de Projectivy y se muestran desde su sitio. [`PROMPT.md`](PROMPT.md) contiene el encargo actualizado para un asistente técnico.
 
 Al terminar, desactiva Depuración inalámbrica en la TV si ya no la necesitas. Un cambio de firmware puede volver a habilitar LauncherX o alterar prioridades HOME; en ese caso revisa `status` antes de repetir pasos.

@@ -1,16 +1,12 @@
-<!-- Thanks. One or two sentences on what this changes and the TV it was tried on is plenty. -->
+## Cambio propuesto
 
-**Tested on:** <!-- model, Android version -->
+Explica qué cambia en esta variante de CleanYourTV con Projectivy.
 
-### If this adds or changes a TV list
-- [ ] `examples/<brand>-<model>/debloat.txt`, header with model, Android version and firmware build
-- [ ] Only packages I actually disabled and lived with; anything I had to re-enable is noted
-- [ ] A row in `examples/README.md` and one in the README's TV table
-- [ ] Nothing in the list uninstalls
+## Equipo y comprobaciones
 
-### If this touches the launcher
-- [ ] Verified on a real TV, screenshot attached
-- [ ] D-pad checked from every edge (Up, Down, Left, Right)
-- [ ] No network, no background service, no new permission
-- [ ] New strings in `values/strings.xml` and the other `values-*` folders
-- [ ] Anything TV-specific is in `config.xml` or a theme, not in code
+- Modelo, Android y compilación:
+- Estado de HOME antes y después:
+- Resultado de Inicio, Fuentes, Ajustes y reinicio completo:
+- Restauración comprobada o límite de la comprobación:
+
+Si agregas imágenes, utiliza capturas auténticas de Projectivy e indica su origen. El proyecto principal y su autor se acreditan en README.md y LICENSE.

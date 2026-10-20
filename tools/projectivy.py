@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Make an already installed Projectivy the Android TV HOME app, with a local undo record.
+"""Asigna Projectivy como HOME de Android TV y guarda un registro local para restaurar.
 
-Uses the platform-tools adb client, including Android 11+ wireless debugging ports.
-Only the known Google TV launcher is disabled automatically. No apps are uninstalled.
+Usa adb de Platform Tools, incluidos los puertos de depuración inalámbrica.
+Solo desactiva automáticamente el LauncherX reconocido. No desinstala aplicaciones.
 """
 import argparse
 import json
@@ -28,7 +28,7 @@ def adb(serial, *args, required=True):
     proc = subprocess.run(["adb", "-s", serial, *args], capture_output=True, text=True)
     output = (proc.stdout + proc.stderr).strip()
     if required and (proc.returncode or re.search(r"(?im)^(error:|exception|failure)", output)):
-        raise DeviceError(f"adb {' '.join(args)}: {output or 'failed'}")
+        raise DeviceError(f"adb {' '.join(args)}: {output or 'falló'}")
     return output
 
 
@@ -51,14 +51,14 @@ def disabled(serial, package):
 
 
 def role_holder(serial):
-    # Older Android releases may lack this command. HOME resolution remains authoritative.
+    # Algunas versiones de Android no tienen este comando. La resolución HOME es decisiva.
     output = shell(serial, "cmd role get-role-holders android.app.role.HOME", required=False)
     return PROJECTIVY if PROJECTIVY in output else (STOCK if STOCK in output else None)
 
 
 def set_home(serial, component):
     if not COMPONENT.fullmatch(component):
-        raise DeviceError(f"Invalid HOME component: {component!r}")
+        raise DeviceError(f"Componente HOME inválido: {component!r}")
     shell(serial, f"cmd package set-home-activity {component}")
 
 
@@ -72,22 +72,22 @@ def ensure_wifi_safe(serial):
     owners = re.findall(r"cname=([^\s]+)", wifi)
     if not owners:
         raise DeviceError(
-            "Cannot determine who owns saved Wi-Fi networks. Leave setupwraith enabled; "
-            "check on the TV or use a wired connection and restore manually."
+            "No se pudo determinar quién guardó las redes Wi-Fi. Se conserva setupwraith; "
+            "comprueba el estado en la TV o usa una conexión por cable y restaura manualmente."
         )
     if any("setupwraith" in owner.lower() for owner in owners):
         raise DeviceError(
-            "A saved Wi-Fi network belongs to setupwraith. Forget and rejoin it in "
-            "TV Settings > Network & Internet, then retry."
+            "Una red Wi-Fi guardada pertenece a setupwraith. Olvídala y vuelve a conectarla "
+            "en Ajustes > Red e Internet de la TV; después, reintenta."
         )
 
 
 def snapshot(serial):
     original_home = home(serial)
     if not original_home:
-        raise DeviceError("HOME resolves to a chooser or nothing. Select the stock Home on the TV first.")
+        raise DeviceError("HOME resuelve al selector o a nada. Selecciona primero el inicio original en la TV.")
     if not original_home.startswith(STOCK + "/"):
-        raise DeviceError(f"Expected {STOCK} as the current Home, found {original_home}.")
+        raise DeviceError(f"Se esperaba {STOCK} como HOME actual; se encontró {original_home}.")
     return {
         "version": 1,
         "device": shell(serial, "getprop ro.product.device"),
@@ -109,16 +109,16 @@ def save(path, data):
 def load(path, serial):
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("version") != 1 or not COMPONENT.fullmatch(data.get("original_home", "")):
-        raise DeviceError("The backup is invalid or has an unsupported format.")
+        raise DeviceError("La copia es inválida o tiene un formato no admitido.")
     if data.get("device") != shell(serial, "getprop ro.product.device"):
-        raise DeviceError("The backup is for another device. No changes were made.")
+        raise DeviceError("La copia pertenece a otro dispositivo. No se hicieron cambios.")
     if data.get("build") != shell(serial, "getprop ro.build.fingerprint"):
-        raise DeviceError("The TV firmware changed since the backup. Restore manually after reviewing it.")
+        raise DeviceError("El firmware cambió desde la copia. Revísala y restaura manualmente.")
     return data
 
 
 def restore(serial, data):
-    # Enable original HOME candidates before setting the original component.
+    # Habilitar candidatos HOME originales antes de asignar el componente original.
     if data["setup_enabled"] and installed(serial, SETUP):
         shell(serial, f"pm enable --user 0 {SETUP}")
     if data["stock_enabled"]:
@@ -127,35 +127,35 @@ def restore(serial, data):
     set_role(serial, data.get("role_holder") or data["original_home"].split("/")[0])
     current = home(serial)
     if current != data["original_home"]:
-        raise DeviceError(f"Restore incomplete: HOME resolves to {current or 'nothing'}.")
-    print(f"Restored HOME: {current}")
+        raise DeviceError(f"Restauración incompleta: HOME resuelve a {current or 'nada'}.")
+    print(f"HOME restaurado: {current}")
 
 
 def apply(serial, backup):
     if backup.exists():
-        raise DeviceError(f"{backup} already exists. Use it for restore; do not overwrite the original state.")
+        raise DeviceError(f"{backup} ya existe. Úsalo para restaurar; no sobrescribas el estado original.")
     if not installed(serial, PROJECTIVY):
-        raise DeviceError("Install and configure Projectivy on the TV before running this command.")
+        raise DeviceError("Instala y configura Projectivy en la TV antes de ejecutar este comando.")
     if not installed(serial, STOCK):
-        raise DeviceError(f"{STOCK} is absent; this automated flow targets Google TV with LauncherX.")
+        raise DeviceError(f"{STOCK} no está instalado; este flujo automatizado requiere Google TV con LauncherX.")
     data = snapshot(serial)
-    # The TCL G08 setup wizard can take HOME as soon as LauncherX is disabled.
-    # Check before touching either package, while ADB and the stock launcher still work.
+    # En TCL G08, setupwraith puede tomar HOME al desactivar LauncherX.
+    # Comprobar antes de tocar paquetes, mientras ADB y el inicio original funcionan.
     if data["setup_enabled"]:
         ensure_wifi_safe(serial)
     started = shell(serial, f"am start -W -n {PROJECTIVY_HOME}")
     if "Status: ok" not in started or re.search(r"(?im)^error", started):
-        raise DeviceError(f"Projectivy did not start: {started}")
+        raise DeviceError(f"Projectivy no se abrió: {started}")
     save(backup, data)
-    print(f"Saved original state to {backup}")
+    print(f"Estado original guardado en {backup}")
     try:
         set_home(serial, PROJECTIVY_HOME)
         set_role(serial, PROJECTIVY)
         shell(serial, f"pm disable-user --user 0 {STOCK}")
-        # Disabling a HOME claimant can clear Android's chosen HOME.
+        # Desactivar un candidato HOME puede borrar la selección de Android.
         set_home(serial, PROJECTIVY_HOME)
-        # On the verified A400 Pro firmware, setupwraith reclaimed HOME on reboot.
-        # Disable it even if Projectivy briefly resolves here.
+        # En el firmware A400 Pro comprobado, setupwraith retomaba HOME al reiniciar.
+        # Desactivarlo aunque Projectivy resuelva temporalmente aquí.
         verified_tcl = ("G08_4K_GB_NF" in data["build"]
                         and "UTT2.250416.001/AU02" in data["build"])
         if data["setup_enabled"] and (home(serial) != PROJECTIVY_HOME or verified_tcl):
@@ -163,35 +163,35 @@ def apply(serial, backup):
             set_home(serial, PROJECTIVY_HOME)
         current = home(serial)
         if current != PROJECTIVY_HOME:
-            raise DeviceError(f"HOME resolves to {current or 'nothing'}, not Projectivy.")
+            raise DeviceError(f"HOME resuelve a {current or 'nada'}, no a Projectivy.")
         shell(serial, "input keyevent 3")
-        print(f"Projectivy owns HOME: {current}. Press Home and verify Inputs and Settings on the remote.")
-        print("Then perform a full reboot and check that Projectivy opens without accessibility.")
+        print(f"Projectivy es HOME: {current}. Comprueba Inicio, Fuentes y Ajustes en el control.")
+        print("Reinicia completamente y comprueba que Projectivy se abra sin accesibilidad.")
     except Exception as error:
-        print(f"Handover failed: {error}. Attempting to restore the original HOME.", file=sys.stderr)
+        print(f"Falló el cambio: {error}. Intentando restaurar el HOME original.", file=sys.stderr)
         try:
             restore(serial, data)
         except Exception as restore_error:
-            print(f"Automatic restore failed: {restore_error}", file=sys.stderr)
-            print(f"Keep {backup}; reconnect ADB and run the restore command.", file=sys.stderr)
-        raise DeviceError("Projectivy handover did not complete.") from error
+            print(f"Falló la restauración automática: {restore_error}", file=sys.stderr)
+            print(f"Conserva {backup}; reconecta ADB y ejecuta restore.", file=sys.stderr)
+        raise DeviceError("No se completó el cambio a Projectivy.") from error
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("status", "apply", "restore"))
-    parser.add_argument("--serial", required=True, help="ADB device serial, e.g. 192.168.100.107:44023")
+    parser.add_argument("--serial", required=True, help="Identificador ADB, por ejemplo 192.168.100.107:44023")
     parser.add_argument("--backup", type=Path, default=Path("projectivy-backup.json"))
     args = parser.parse_args()
     try:
         if adb(args.serial, "get-state") != "device":
-            raise DeviceError("ADB is not authorized or the TV is offline.")
+            raise DeviceError("ADB no está autorizado o la TV está desconectada.")
         if args.action == "status":
             for package in (PROJECTIVY, STOCK, SETUP):
-                print(f"{package}: " + ("absent" if not installed(args.serial, package)
-                      else "disabled" if disabled(args.serial, package) else "enabled"))
-            print(f"HOME: {home(args.serial) or 'chooser/unknown'}")
-            print(f"HOME role: {role_holder(args.serial) or 'unknown'}")
+                print(f"{package}: " + ("ausente" if not installed(args.serial, package)
+                      else "desactivado" if disabled(args.serial, package) else "activado"))
+            print(f"HOME: {home(args.serial) or 'selector/desconocido'}")
+            print(f"Rol HOME: {role_holder(args.serial) or 'desconocido'}")
         elif args.action == "apply":
             apply(args.serial, args.backup)
         else:

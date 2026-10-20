@@ -28,9 +28,6 @@ PACKAGE_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+")
 HOME_RE = re.compile(r"[A-Za-z_][\w.]*/[\w.$]+")
 SCALE_RE = re.compile(r"-?\d+(\.\d+)?")
 SETTINGS = ("window_animation_scale", "transition_animation_scale", "animator_duration_scale")
-# This project's own launcher. When it already owned Home before debloating, restoring Home to it
-# would leave the stock launcher off, so restore goes back to the stock one instead.
-CUSTOM_LAUNCHER = "com.gathin.tvhome"
 VERSION = 1
 
 
@@ -240,19 +237,16 @@ def restore_commands(list_path, stock, host):
     for name, state in untouched:
         sys.stderr.write(f"  leaving {name} alone ({state} when the record was taken)\n")
 
-    # The stock launcher comes back unless the owner had disabled it before cleanup: the list may
-    # have disabled it even when it was not the recorded Home (e.g. the custom launcher owned Home).
+    # With a record, keep the exact HOME and package state from before this debloat list.
+    # A Projectivy HOME must not be replaced by the stock launcher during a debloat undo.
     fallback = stock or "com.google.android.tvlauncher"
-    if states.get(fallback) != "disabled" and fallback not in re_enable:
-        commands.append(f"pm enable {fallback}")
-
     home = record.get("home")
-    if home and home.split("/", 1)[0] != CUSTOM_LAUNCHER:
+    if home:
         commands.append(f"cmd package set-home-activity --user 0 {home}")
     else:
-        # Nothing handled HOME before cleanup (fresh TV, chooser only), or this project's launcher
-        # did, so there is no stock component to replay; ask the TV to resolve the stock launcher the
-        # way restore.sh always did.
+        # No component answered HOME before cleanup. Fall back to the caller's stock launcher.
+        if states.get(fallback) != "disabled" and fallback not in re_enable:
+            commands.append(f"pm enable {fallback}")
         commands.append(f"cmd package set-home-activity --user 0 $(cmd package resolve-activity "
                         f"--brief -a android.intent.action.MAIN -c android.intent.category.HOME "
                         f"{fallback} | tail -n 1)")
