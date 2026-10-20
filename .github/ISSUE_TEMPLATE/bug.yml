@@ -1,43 +1,34 @@
-name: Bug
-description: The launcher, a script or the prompt did something wrong
+name: Fallo en este fork
+description: Reporta un problema con el script o la documentación para Projectivy.
 labels: [bug]
 body:
-  - type: dropdown
-    id: part
-    attributes:
-      label: Which part
-      options:
-        - Launcher (the home screen)
-        - Install script (build-and-install)
-        - Debloat or restore scripts
-        - tools/tv.py or b64push.py
-        - The prompt (PROMPT.md)
-        - Website (cleanyour.tv)
-    validations:
-      required: true
   - type: input
     id: tv
     attributes:
-      label: TV model and Android version
-      placeholder: Xiaomi MiTV-MOOQ1, Android TV 10
+      label: Modelo, Android y compilación
+      placeholder: TCL 75A400 Pro, Android 14, UTT2.250416.001 AU02
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área afectada
+      options:
+        - Conexión ADB
+        - Cambio de HOME a Projectivy
+        - Restauración del HOME original
+        - Documentación
+        - Lista de debloat heredada
     validations:
       required: true
   - type: textarea
-    id: what
+    id: result
     attributes:
-      label: What happened, and what you expected
+      label: Resultado observado y esperado
+      description: Omite direcciones IP, nombres de red, claves ADB e identificadores privados.
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps to reproduce
-      placeholder: |
-        1. Press Down twice from the dock
-        2. Press Home
-  - type: textarea
-    id: logs
-    attributes:
-      label: Output or screenshot
-      description: Script output, a `logcat` excerpt, or a screenshot pulled from the TV.
-      render: shell
+      label: Pasos para reproducirlo

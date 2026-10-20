@@ -1,16 +1,11 @@
 tools/venv/
 tools/adbkey/
 __pycache__/
-launcher/.gradle/
-launcher/build/
-launcher/app/build/
-launcher/local.properties
-# your own TV's dumps (serial, android_id, device names) stay local
+# Los volcados de tu TV (serie, identificador y nombre) permanecen locales.
 backup/
+projectivy-backup.json
 .DS_Store
 
-# Generated install bundles and JVM crash reports stay out of contributions.
+# Archivos instalables descargados para uso local.
 *.apk
 *.aab
-launcher/hs_err_pid*.log
-launcher/replay_pid*.log

@@ -292,10 +292,10 @@ class RecoveryRecordTest(unittest.TestCase):
         self.assertIn("pm enable com.example.enabled", sent)
         self.assertNotIn("pm enable com.example.already_off", sent)
 
-    def test_custom_launcher_home_restores_the_stock_launcher(self):
-        custom = "com.gathin.tvhome/.MainActivity"
+    def test_projectivy_home_is_preserved_when_restoring_debloat(self):
+        custom = "com.spocky.projengmenu/.ui.home.MainActivity"
         self.tv(installed=["com.example.enabled", "com.example.already_off",
-                           "com.google.android.tvlauncher", "com.gathin.tvhome"],
+                           "com.google.android.tvlauncher", "com.spocky.projengmenu"],
                 home=custom)
         self.assertEqual(self.run_script("disable.sh", str(self.list_path)).returncode, 0)
         self.assertEqual(self.record()["home"], custom)
@@ -304,19 +304,16 @@ class RecoveryRecordTest(unittest.TestCase):
         result = self.run_script("restore.sh", str(self.list_path))
         self.assertEqual(result.returncode, 0, result.stderr)
         sent = self.sent()
-        self.assertIn("pm enable com.google.android.tvlauncher", sent)
-        self.assertNotIn(f"cmd package set-home-activity --user 0 {custom}", sent)
+        self.assertNotIn("pm enable com.google.android.tvlauncher", sent)
+        self.assertIn(f"cmd package set-home-activity --user 0 {custom}", sent)
         home = [c for c in sent if c.startswith("cmd package set-home-activity")]
         self.assertEqual(len(home), 1, sent)
-        self.assertIn("resolve-activity", home[0])
-        self.assertIn("com.google.android.tvlauncher", home[0])
-        self.assertLess(sent.index("pm enable com.google.android.tvlauncher"), sent.index(home[0]))
 
     def test_stock_launcher_disabled_before_cleanup_stays_disabled(self):
-        custom = "com.gathin.tvhome/.MainActivity"
+        custom = "com.spocky.projengmenu/.ui.home.MainActivity"
         self.write_list(["com.example.enabled", "com.google.android.tvlauncher"])
         self.tv(installed=["com.example.enabled", "com.google.android.tvlauncher",
-                           "com.gathin.tvhome"],
+                           "com.spocky.projengmenu"],
                 disabled=["com.google.android.tvlauncher"], home=custom)
         self.assertEqual(self.run_script("disable.sh", str(self.list_path)).returncode, 0)
         self.assertEqual(self.record()["packages"]["com.google.android.tvlauncher"], "disabled")

@@ -22,6 +22,7 @@ SOFTWARE.
 
 ---
 
-The Outfit typeface in launcher/app/src/main/res/font/outfit.ttf is copyright
-The Outfit Project Authors and licensed under the SIL Open Font License 1.1,
-see launcher/FONT-LICENSE-OFL.txt.
+Esta variante conserva el aviso de derechos de autor y la licencia de
+CleanYourTV, creado por Gathin. Los cambios propios del fork también se
+distribuyen bajo MIT. Projectivy Launcher es una aplicación independiente
+de Spocky y no se incluye en este repositorio.
